@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>1 Billion Visits - Viral Wheel</title>
+
+<style>
+/* Reset básico */
+* {margin:0;padding:0;box-sizing:border-box;}
+
+body{
+background:#050505;
+color:white;
+font-family: 'Arial', sans-serif;
+text-align:center;
+overflow-x:hidden;
+}
+
+/* Contenedor central */
+.container{
+max-width:1000px;
+margin:auto;
+padding:50px 20px;
+}
+
+/* Título grande con neón */
+h1{
+font-size:70px;
+color:#8a5cff;
+text-shadow:0 0 10px #8a5cff,0 0 20px #8a5cff,0 0 30px #8a5cff;
+letter-spacing:3px;
+animation: pulse 2s infinite alternate;
+}
+
+/* Animación glow */
+@keyframes pulse{
+0%{text-shadow:0 0 10px #8a5cff,0 0 20px #8a5cff,0 0 30px #8a5cff;}
+100%{text-shadow:0 0 25px #8a5cff,0 0 50px #8a5cff,0 0 75px #8a5cff;}
+}
+
+/* Contador con glow */
+.counter{
+font-size:90px;
+margin:30px 0;
+color:#00eaff;
+text-shadow:0 0 15px #00eaff,0 0 30px #00eaff;
+transition:text-shadow 0.3s ease;
+}
+
+/* Subtexto */
+.sub{
+color:#aaa;
+margin-bottom:40px;
+font-size:18px;
+}
+
+/* Espacios para anuncios */
+.ad{
+margin:30px 0;
+height:90px;
+border:2px dashed #444;
+display:flex;
+align-items:center;
+justify-content:center;
+color:#666;
+font-size:16px;
+}
+
+/* Canvas ruleta */
+#wheel{
+margin:40px auto;
+width:350px;
+height:350px;
+}
+
+/* Botón spin */
+button{
+padding:15px 35px;
+font-size:20px;
+background:#111;
+color:white;
+border:2px solid #ff00c8;
+cursor:pointer;
+margin-top:20px;
+border-radius:10px;
+box-shadow:0 0 15px #ff00c8;
+transition:0.3s;
+}
+
+button:hover{
+box-shadow:0 0 30px #ff00c8;
+transform:scale(1.05);
+}
+
+/* Resultado */
+.result{
+margin-top:25px;
+font-size:24px;
+min-height:30px;
+color:#00ff7f;
+text-shadow:0 0 10px #00ff7f;
+}
+
+/* Botones sociales */
+.social{
+margin-top:50px;
+}
+
+.social button{
+margin:10px;
+padding:12px 25px;
+font-size:16px;
+border-radius:8px;
+border:none;
+cursor:pointer;
+}
+
+.social button:nth-child(2){background:#ff0080;color:white;}
+.social button:nth-child(3){background:#1da1f2;color:white;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>GOAL: 1,000,000,000 VISITS</h1>
+
+<div class="counter" id="counter">Loading...</div>
+
+<div class="sub">Help reach one billion visits.</div>
+
+<div class="ad">AD SPACE</div>
+
+<canvas id="wheel" width="350" height="350"></canvas>
+
+<button onclick="spinWheel()">SPIN THE WHEEL</button>
+
+<div class="result" id="result"></div>
+
+<div class="ad">AD SPACE</div>
+
+<div class="social">
+<p>Share this page and help reach 1 billion visits</p>
+<button onclick="share()">Share</button>
+<button onclick="window.open('https://instagram.com','_blank')">Instagram</button>
+</div>
+
+</div>
+
+<script>
+// Ruleta
+const wheel = document.getElementById("wheel");
+const ctx = wheel.getContext("2d");
+const segments = [
+"EMPTY","EMPTY","EMPTY","EMPTY","EMPTY","EMPTY",
+"FREE GIFT","SURPRISE"
+];
+let angle=0;
+
+function drawWheel(){
+ctx.clearRect(0,0,350,350);
+const arc=Math.PI*2/segments.length;
+for(let i=0;i<segments.length;i++){
+ctx.beginPath();
+ctx.fillStyle=i%2?"#111":"#222";
+ctx.moveTo(175,175);
+ctx.arc(175,175,175,i*arc,(i+1)*arc);
+ctx.fill();
+ctx.save();
+ctx.translate(175,175);
+ctx.rotate(i*arc+arc/2);
+ctx.fillStyle="white";
+ctx.font="14px Arial";
+ctx.fillText(segments[i],110,5);
+ctx.restore();
+}
+drawPointer();
+}
+
+function drawPointer(){
+ctx.beginPath();
+ctx.moveTo(170,0);
+ctx.lineTo(180,0);
+ctx.lineTo(175,20);
+ctx.fillStyle="#ff00c8";
+ctx.fill();
+}
+
+drawWheel();
+
+function spinWheel(){
+let spins=Math.random()*360+720;
+angle+=spins;
+wheel.style.transition="transform 4s ease-out";
+wheel.style.transform=`rotate(${angle}deg)`;
+setTimeout(showResult,4000);
+}
+
+function showResult(){
+let deg = angle % 360;
+let segmentSize = 360/segments.length;
+let index = Math.floor((360-deg)/segmentSize)%segments.length;
+let prize = segments[index];
+if(prize==="EMPTY"){
+document.getElementById("result").innerText="Sorry, try again with another account.";
+}else{
+document.getElementById("result").innerText="🎉 Congratulations! You won: "+prize;
+}
+}
+
+// Contador global usando CountAPI
+async function loadCounter(){
+let url="https://api.countapi.xyz/hit/viralwheel/visits";
+let res=await fetch(url);
+let data=await res.json();
+document.getElementById("counter").innerText=data.value.toLocaleString();
+}
+loadCounter();
+
+// Compartir
+function share(){
+if(navigator.share){
+navigator.share({title:"1 Billion Visits",text:"Help reach 1 billion visits!",url:window.location.href});
+}else{
+navigator.clipboard.writeText(window.location.href);
+alert("Link copied!");
+}
+}
+
+</script>
+
+</body>
+</html>
